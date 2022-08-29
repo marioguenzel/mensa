@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # pip install beautifulsoup4
 # pip install requests
@@ -53,6 +53,21 @@ def beautify_mensa_plan(plan_dict):
     return complete_list
 
 
+def plan_for_date(date):
+    try:
+        # Get mensa plan as list of dictionaries
+        plan_dict = get_request(date)
+
+        # Beautify mensa plan
+        plan_list = beautify_mensa_plan(plan_dict)
+
+        # Print output
+        print(f'--Mensa plan for {date}--')
+        print_plan(plan_list)
+    except:
+        print(f'Mensa date for {date} could not be printed.')
+
+
 if __name__ == '__main__':
     date = str(datetime.date.today())
     # options
@@ -60,6 +75,8 @@ if __name__ == '__main__':
     parser.add_option("-d", "--date", dest="date", help="get mensa plan for DATE in the form yyyy-mm-dd",
                       metavar="DATE")
     parser.add_option("-p", "--plus", dest="plus", type='int', help="get mensa plan for today plus X days", metavar="X")
+    parser.add_option("-n", "--next", dest="next", type='int', help="get mensa plan for next X days including today",
+                      metavar="X")
 
     (options, args) = parser.parse_args()
 
@@ -69,20 +86,11 @@ if __name__ == '__main__':
     if options.plus is not None:
         date = str(datetime.date.today() + datetime.timedelta(days=options.plus))
 
-    # # Request webpage
-    # session = requests.Session()
-    # res = session.get('https://www.stwdo.de/mensa-cafes-und-catering/tu-dortmund/hauptmensa/' + date)
-    #
-    # # Search info
-    # date = find_date(res.text)
-    # meals_and_prices = find_meals_and_prices(res.text)
+    if options.next is not None:
+        next_var = options.next
+        for idx in range(0, next_var + 1):
+            date = str(datetime.date.today() + datetime.timedelta(idx))
+            plan_for_date(date)
+        quit()
 
-    # Get mensa plan as list of dictionaries
-    plan_dict = get_request(date)
-
-    # Beautify mensa plan
-    plan_list = beautify_mensa_plan(plan_dict)
-
-    # Print output
-    print(f'--Mensa plan for {date}--')
-    print_plan(plan_list)
+    plan_for_date(date)
